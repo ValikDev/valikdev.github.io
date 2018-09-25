@@ -1,0 +1,23 @@
+<html>
+<head>
+    <title>Timer</title>
+    <script type="text/javascript">
+        console.log("User Agent: " + navigator.userAgent);
+        document.addEventListener("DOMContentLoaded", function() {
+            console.log("DOM is loaded");
+        }, false);
+        document.addEventListener("visibilitychange", function() {
+            console.log("Page is " + (document["hidden"] ? "hidden" : "visible"));
+        }, false);
+        document.addEventListener("deviceready", function() {
+            console.log("Cordova is ready");
+        }, false);
+        setInterval(function() {
+            console.log((new Date()) + "")
+        }, 1000);
+    </script>
+</head>
+<body>
+    Script sends to console.log a current time each one second.
+</body>
+</html>

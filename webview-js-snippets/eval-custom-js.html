@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="">
+    <title></title>
+    <style>
+        body {
+            margin: 0;
+            padding: 5vmin;
+        }
+
+        textarea#code {
+            width: 90vmin;
+            height: 90vmin;
+            border: 1px solid black;
+        }
+
+        button#run {
+            background: gray;
+            border: 1px solid black;
+        }
+    </style>
+    <script type="text/javascript">
+        window.onload = () => {
+            let htmlElementButton = document.getElementById("run");
+            let htmlElementTextarea = document.getElementById("code");
+
+            htmlElementButton.addEventListener("click", () => {
+                let code = htmlElementTextarea.value;
+                eval(code);
+            });
+        }
+    </script>
+</head>
+<body>
+    <strong>Write JS code to be run:</strong>
+    <textarea id="code">alert("test");</textarea><br>
+    <button id="run">Run</button>
+</body>
+</html>

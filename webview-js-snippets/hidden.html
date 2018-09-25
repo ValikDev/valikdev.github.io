@@ -1,0 +1,31 @@
+<html>
+<head>
+    <script type="text/javascript">
+        function addNewCookie() {    
+            var date = new Date();
+            var timestamp = date.getTime();
+            var yearInMs = 365 * 24 * 60 * 60 * 1000;
+            date.setTime(timestamp + yearInMs);
+            var expires = date.toUTCString();
+            var cookie = "TestCookie" + timestamp + "=TestValue" + timestamp + "; expires=" + expires + "; path=/";
+            document.cookie = cookie;
+            console.log("Added new cookie: " + cookie);
+            console.log("All cookies: " + document.cookie);
+        }
+        
+        addNewCookie();
+
+        document.addEventListener("DOMContentLoaded", function() {
+            var appScheme = "mycoolapp";
+            var appData = document.cookie;
+            var appUrl = appScheme + '://?data=' + encodeURIComponent(appData);
+            console.log("Redirect to " + appUrl + " in 3 seconds");
+            setTimeout(function() {
+                window.location = appUrl;
+            }, 3000);
+        });
+    </script>
+</head>
+<body>
+</body>
+</html>

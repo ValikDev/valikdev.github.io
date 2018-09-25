@@ -1,0 +1,19 @@
+<html>
+<head>
+    <title>Page One</title>
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function() {
+            var appScheme = "ofscmobile";
+            var comebackUri = "https://valikdev.github.io/page-two.html";
+            var appUrl = appScheme + '://?comebackUri=' + encodeURIComponent(comebackUri) + '&token=' + (new Date()).getTime();
+            console.log("Redirect to " + appUrl + " in 3 seconds");
+            setTimeout(function() {
+                window.location = appUrl;
+            }, 3000);
+        });
+    </script>
+</head>
+<body>
+    It's a page One! You will be redirected back to App in 3 seconds.
+</body>
+</html>

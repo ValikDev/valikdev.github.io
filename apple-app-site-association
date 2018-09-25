@@ -1,0 +1,12 @@
+{
+    "applinks": {
+        "apps": [],
+        "details": [{
+            "appID": "XXXXXXXXXX.com.example.universallink.one",
+            "paths": ["*"]
+        }, {
+            "appID": "XXXXXXXXXX.com.example.universallink.two",
+            "paths": ["*"]
+        }]
+    }
+}

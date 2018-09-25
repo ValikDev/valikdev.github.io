@@ -1,0 +1,28 @@
+<html>
+<head>
+    <title>Open URL</title>
+    <script type="text/javascript">
+        console.log("User Agent: " + navigator.userAgent);
+        document.addEventListener("DOMContentLoaded", function() {
+            console.log("DOM is loaded");
+
+            var params = new URLSearchParams(location.search);
+            var url = params.get("url");
+            console.log("Given url is " + url);
+
+            if (url) {
+                var urlDecoded = atob(url);
+                var timeout = 3000;
+                console.log("Decoded url is " + urlDecoded + " will be opened in " + timeout + " milliseconds");
+
+                setTimeout(function() {
+                    document.location.href = urlDecoded;
+                }, timeout);
+            }
+        }, false);
+    </script>
+</head>
+<body>
+    Script opens a given URL encoded as Base64 string. Look at JS console for additional info.
+</body>
+</html>

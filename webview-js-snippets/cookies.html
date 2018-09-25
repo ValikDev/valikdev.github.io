@@ -1,0 +1,15 @@
+<script type="text/javascript">
+    function addNewCookie() {    
+        var date = new Date();
+        var timestamp = date.getTime();
+        var yearInMs = 365 * 24 * 60 * 60 * 1000;
+        date.setTime(timestamp + yearInMs);
+        var expires = date.toUTCString();
+        var cookie = "TestCookie" + timestamp + "=TestValue" + timestamp + "; expires=" + expires + "; path=/";
+        document.cookie = cookie;
+        console.log("Added new cookie: " + cookie);
+        console.log("All cookies: " + document.cookie);
+    }
+
+    addNewCookie();
+</script>
