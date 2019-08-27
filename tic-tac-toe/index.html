@@ -25,7 +25,7 @@
             text-align: center;
             line-height: 30vmin;
             font-size: 30vmin;
-            font-family: Helvetica;
+            font-family: Helvetica, Arial, sans-serif;
         }
 
         #game-field div#cell-00,
@@ -60,9 +60,22 @@
         }
 
         #game-scores {
+            margin: 5vmin;
             text-align: center;
             font-size: 10vmin;
-            font-family: Helvetica;
+            font-family: Helvetica, Arial, sans-serif;
+        }
+
+        #todos {
+            border: 0.5vmin solid #999;
+            padding: 5vmin;
+            background-color: #eee;
+            color: #555;
+            font-family: "Courier New", Courier, monospace;
+        }
+
+        .hidden {
+            display: none;
         }
     </style>
     <script>
@@ -332,14 +345,16 @@
              * @private
              */
             _printResult($message) {
-                let div = document.getElementById('game-scores');
-                div.innerText = $message;
+                let scores = document.getElementById('game-scores');
+                scores.innerText = $message;
+                let todos = document.getElementById('todos');
+                todos.classList.remove('hidden');
             }
         }
 
         window.onload = () => {
-            let playerX = prompt('Please enter a payer X name');
-            let playerO = prompt('Please enter a payer O name');
+            let playerX = prompt('Please enter a payer X name', 'X');
+            let playerO = prompt('Please enter a payer O name', 'O');
             new Game(playerX, playerO);
         }
     </script>
@@ -351,6 +366,21 @@
         <div id="cell-20"></div><div id="cell-21"></div><div id="cell-22"></div>
     </div>
     <div id="game-scores">
+    </div>
+    <div id="todos" class="hidden">
+        <p><strong>TODO list</strong></p>
+        <p><i>Web part</i></p>
+        <p>
+            1. Implement class Scores to represent game results<br>
+            2. Show results of the last and previous games<br>
+            3. Start next game without reloading page
+        </p>
+        <p><i>Server part</i></p>
+        <p>
+            1. Implement endpoints:<br>
+            - GET scores/ which provides list of game results in JSON
+            - POST scores/ which adds a new item to game results
+        </p>
     </div>
 </body>
 </html>
