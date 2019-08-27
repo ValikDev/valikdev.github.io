@@ -353,8 +353,8 @@
         }
 
         window.onload = () => {
-            let playerX = prompt('Please enter a payer X name', 'X');
-            let playerO = prompt('Please enter a payer O name', 'O');
+            let playerX = prompt('Please enter a payer X name', 'X') || 'X';
+            let playerO = prompt('Please enter a payer O name', 'O') || 'O';
             new Game(playerX, playerO);
         }
     </script>
