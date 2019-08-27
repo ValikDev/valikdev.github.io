@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Tic Tac Toe game">
+    <meta name="keywords" content="Tic Tac Toe, Noughts and Crosses, Xs and Os">
+    <meta name="author" content="Valentyn Kovalenko https://www.linkedin.com/in/valentinkovalenko">
+    <title>Tic Tac Toe</title>
+    <style>
+        #game-field {
+            margin: auto;
+            width: 90vmin;
+            height: 90vmin;
+            background-color: #eee;
+        }
+
+        #game-field div[id^="cell-"] {
+            width: 30vmin;
+            height: 30vmin;
+            color: #000;
+            box-sizing: border-box;
+            border: 0.5vmin solid #888;
+            float: left;
+            text-align: center;
+            line-height: 30vmin;
+            font-size: 30vmin;
+            font-family: Helvetica;
+        }
+
+        #game-field div#cell-00,
+        #game-field div#cell-10,
+        #game-field div#cell-20 {
+            border-left: none;
+            clear: left;
+        }
+
+        #game-field div#cell-02,
+        #game-field div#cell-12,
+        #game-field div#cell-22 {
+            border-right: none;
+            clear: right;
+        }
+
+        #game-field div#cell-00,
+        #game-field div#cell-01,
+        #game-field div#cell-02 {
+            border-top: none;
+        }
+
+        #game-field div#cell-20,
+        #game-field div#cell-21,
+        #game-field div#cell-22 {
+            border-bottom: none;
+        }
+
+        #game-field div.crossed {
+            transition: background-color 0.5s ease;
+            background-color: #a0a0ff;
+        }
+
+        #game-scores {
+            text-align: center;
+            font-size: 10vmin;
+            font-family: Helvetica;
+        }
+    </style>
+    <script>
+        const CELL_STATE_TIC = 'X';
+        const CELL_STATE_TAC = 'O';
+        const CELL_STATE_EMPTY = '';
+        const CELL_CSS_CLASS_CROSSED = 'crossed';
+
+        /**
+         * Class represents one particular cell on Tic Tac Toe game field
+         */
+        class Cell {
+
+            /**
+             * @param {string} htmlElementId
+             * @param {function} clickHandler
+             */
+            constructor(htmlElementId, clickHandler) {
+                this._state = CELL_STATE_EMPTY;
+                this._htmlElementId = htmlElementId;
+                this._htmlElement = document.getElementById(this._htmlElementId);
+                this._htmlElement.onclick = () => { clickHandler(this) };
+            }
+
+            isEmpty() {
+                return this._state == CELL_STATE_EMPTY;
+            }
+
+            isTic() {
+                return this._state == CELL_STATE_TIC;
+            }
+
+            isTac() {
+                return this._state == CELL_STATE_TAC;
+            }
+
+            tic() {
+                this._state = CELL_STATE_TIC;
+                this._refresh();
+            }
+
+            tac() {
+                this._state = CELL_STATE_TAC;
+                this._refresh();
+            }
+
+            _refresh() {
+                this._htmlElement.innerText = this._state;
+            }
+
+            cross() {
+                this._htmlElement.classList.add(CELL_CSS_CLASS_CROSSED);
+            }
+        }
+
+        const FIELD_SIZE = 3;
+
+        /**
+         * Class represents Tic Tac Toe game field
+         */
+        class Field {
+
+            /**
+             * @param {function} cellClickHandler
+             */
+            constructor(cellClickHandler) {
+                this._cellClickHandler = cellClickHandler;
+                this._cells = [];
+                this._createCells();
+            }
+
+            _createCells() {
+                for (let y = 0; y < FIELD_SIZE; y++) {
+                    this._cells[y] = new Array(FIELD_SIZE);
+                    for (let x = 0; x < FIELD_SIZE; x++) {
+                        this._cells[y][x] = new Cell(`cell-${y}${x}`, this._cellClickHandler);
+                    }
+                }
+            }
+
+            /**
+             * @param {number} x
+             * @param {number} y
+             * @returns {Cell}
+             */
+            getCell(x, y) {
+                return this._cells[y][x];
+            }
+        }
+
+        /**
+         * Class represents one particular player of Tic Tac Toe game
+         */
+        class Player {
+
+            /**
+             * @param {string} name
+             * @param {boolean} isTic
+             */
+            constructor(name, isTic) {
+                this._name = name;
+                this._isTic = isTic;
+            }
+
+            isTic() {
+                return this._isTic;
+            }
+
+            /**
+             * @returns {string}
+             */
+            get name() {
+                return this._name;
+            }
+        }
+
+        /**
+         * Class represents Tic Tac Toe game
+         */
+        class Game {
+
+            /**
+             * @param {string} playerTicName
+             * @param {string} playerTacName
+             */
+            constructor(playerTicName, playerTacName) {
+                this._playerTic = new Player(playerTicName, true);
+                this._playerTac = new Player(playerTacName, false);
+                this._field = new Field((this._doPlayerStep).bind(this));
+                this._gameOver = false;
+                this._step = 0;
+
+                /**
+                 * @type {Player}
+                 * @private
+                 */
+                this._currentPlayer = null;
+                this._definePlayerForStep();
+            }
+
+            _definePlayerForStep() {
+                if (this._step % 2 == 0) {
+                    this._currentPlayer = this._playerTic;
+                } else {
+                    this._currentPlayer = this._playerTac;
+                }
+            }
+
+            /**
+             * @param {Cell} cell
+             */
+            _doPlayerStep(cell) {
+                if (this._gameOver || !cell.isEmpty()) {
+                    return;
+                }
+
+                if (this._currentPlayer.isTic()) {
+                    cell.tic();
+                } else {
+                    cell.tac();
+                }
+
+                if (this._isPlayerWon(this._currentPlayer)) {
+                    this._gameOver = true;
+                    this._printResult(`${this._currentPlayer.name} is winner!`);
+                    return;
+                }
+
+                if (this._isLastStep()) {
+                    this._gameOver = true;
+                    this._printResult(`Game over!`);
+                    return;
+                }
+
+                this._nextStep();
+                this._definePlayerForStep();
+            }
+
+            /**
+             * @param {Player} player
+             * @returns {boolean}
+             * @private
+             */
+            _isPlayerWon(player) {
+                let win = false;
+                let winHandler = () => { win = true };
+
+                // horizontal & vertical
+                for (let j = 0; j < FIELD_SIZE; j++) {
+                    let lineH = [];
+                    let lineV = [];
+                    for (let i = 0; i < FIELD_SIZE; i++) {
+                        let cellH;
+                        if (cellH = this._matchCellWithPlayer(i, j, player)) {
+                            lineH.push(cellH);
+                        }
+                        let cellV;
+                        if (cellV = this._matchCellWithPlayer(j, i, player)) {
+                            lineV.push(cellV);
+                        }
+                    }
+
+                    this._crossLineIfCompleted(lineH, winHandler);
+                    this._crossLineIfCompleted(lineV, winHandler);
+                }
+
+                // diagonals
+                let lineD1 = [];
+                let lineD2 = [];
+                for (let d = 0; d < FIELD_SIZE; d++) {
+                    let cellD1;
+                    if (cellD1 = this._matchCellWithPlayer(d, d, player)) {
+                        lineD1.push(cellD1);
+                    }
+                    let cellD2;
+                    if (cellD2 = this._matchCellWithPlayer(FIELD_SIZE - d - 1, d, player)) {
+                        lineD2.push(cellD2);
+                    }
+                }
+
+                this._crossLineIfCompleted(lineD1, winHandler);
+                this._crossLineIfCompleted(lineD2, winHandler);
+
+                return win;
+            }
+
+            /**
+             * @param {number} x
+             * @param {number} y
+             * @param {Player} player
+             * @returns {Cell|null} cell
+             * @private
+             */
+            _matchCellWithPlayer(x, y, player) {
+                let cell = this._field.getCell(x, y);
+                if (player.isTic()) {
+                    return cell.isTic() ? cell : null;
+                } else {
+                    return cell.isTac() ? cell : null;
+                }
+            }
+
+            /**
+             * @param {array} line
+             * @param {function} completedHandler
+             * @private
+             */
+            _crossLineIfCompleted(line, completedHandler) {
+                if (line.length == FIELD_SIZE) {
+                    line.forEach(cell => { cell.cross() });
+                    completedHandler();
+                }
+            }
+
+            _isLastStep() {
+                return this._step == FIELD_SIZE * FIELD_SIZE - 1;
+            }
+
+            _nextStep() {
+                this._step++;
+            }
+
+            /**
+             * @todo It must me moved to a separated class Scores
+             *
+             * @param $message
+             * @private
+             */
+            _printResult($message) {
+                let div = document.getElementById('game-scores');
+                div.innerText = $message;
+            }
+        }
+
+        window.onload = () => {
+            let playerX = prompt('Please enter a payer X name');
+            let playerO = prompt('Please enter a payer O name');
+            new Game(playerX, playerO);
+        }
+    </script>
+</head>
+<body>
+    <div id="game-field">
+        <div id="cell-00"></div><div id="cell-01"></div><div id="cell-02"></div>
+        <div id="cell-10"></div><div id="cell-11"></div><div id="cell-12"></div>
+        <div id="cell-20"></div><div id="cell-21"></div><div id="cell-22"></div>
+    </div>
+    <div id="game-scores">
+    </div>
+</body>
+</html>
