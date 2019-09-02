@@ -8,24 +8,48 @@
     <meta name="author" content="Valentyn Kovalenko https://www.linkedin.com/in/valentinkovalenko">
     <title>Tic Tac Toe</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        #game-over,
         #game-field {
-            margin: auto;
-            width: 90vmin;
-            height: 90vmin;
+            width: 100vmin;
+            height: 100vmin;
+        }
+
+        #game-over {
+            position: absolute;
+            z-index: 10000;
+            box-sizing: border-box;
+            padding: 5%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+            font-size: 10vmin;
+            font-family: Helvetica, Arial, sans-serif;
+            font-weight: bold;
+            color: #eee;
+            text-shadow: -1px 0 #000, 0 1px #000, 1px 0 #000, 0 -1px #000, 0 0 10vmin #fff, 0 0 10vmin #fff, 0 0 10vmin #fff, 0 0 10vmin #fff, 0 0 10vmin #fff;
+            opacity: 100%;
+            transition: opacity 3s ease;
+        }
+
+        #game-field {
+            float: left;
+            margin-bottom: 5vmin;
             background-color: #eee;
         }
 
         #game-field div[id^="cell-"] {
-            width: 30vmin;
-            height: 30vmin;
-            color: #000;
+            width: 33.3%;
+            height: 33.3%;
             box-sizing: border-box;
-            border: 0.5vmin solid #888;
+            border: 0.25vmin solid #888;
+            padding: 3.5%;
             float: left;
-            text-align: center;
-            line-height: 30vmin;
-            font-size: 30vmin;
-            font-family: Helvetica, Arial, sans-serif;
         }
 
         #game-field div#cell-00,
@@ -54,33 +78,67 @@
             border-bottom: none;
         }
 
+        #game-field div.tic {
+            content: url('data:image/svg+xml;utf8,<svg version="1.1" id="tic" xmlns="http://www.w3.org/2000/svg" height="100" width="100"><line x1="0" y1="0" x2="100" y2="100" stroke="black" stroke-width="10" /><line x1="100" y1="0" x2="0" y2="100" stroke="black" stroke-width="10" /></svg>');
+        }
+
+        #game-field div.tac {
+            content: url('data:image/svg+xml;utf8,<svg version="1.1" id="tac" xmlns="http://www.w3.org/2000/svg" height="100" width="100"><circle cx="50" cy="50" r="45" stroke="black" stroke-width="10" fill-opacity="0"/></svg>');
+        }
+
         #game-field div.crossed {
-            transition: background-color 0.5s ease;
+            transition: background-color 3s ease;
             background-color: #a0a0ff;
         }
 
         #game-scores {
+            float: left;
+            clear: right;
+            width: calc(100vmax - 100vmin - 5vmin * 2);
             margin: 5vmin;
-            text-align: center;
-            font-size: 10vmin;
+            text-align: left;
+            font-size: 2.5vmin;
+            font-weight: normal;
             font-family: Helvetica, Arial, sans-serif;
         }
+        #game-scores p {
+            margin-bottom: 2vmin;
+            padding: 2vmin;
+            background: #a0a0ff;
+        }
 
-        #todos {
-            border: 0.5vmin solid #999;
-            padding: 5vmin;
-            background-color: #eee;
-            color: #555;
-            font-family: "Courier New", Courier, monospace;
+        nav {
+            text-align: center;
+            font-size: 2.5vmin;
+        }
+
+        @media
+        all and (orientation: portrait) {
+            #game-over,
+            #game-field,
+            #game-scores {
+                float: none;
+                clear: both;
+                margin-left: auto;
+                margin-right: auto;
+            }
+            #game-over,
+            #game-field {
+                width: 100vmin;
+                height: 100vmin;
+            }
+            #game-scores {
+                width: 90vmin;
+            }
         }
 
         .hidden {
-            display: none;
+            visibility: hidden;
         }
     </style>
     <script>
-        const CELL_STATE_TIC = 'X';
-        const CELL_STATE_TAC = 'O';
+        const CELL_STATE_TIC = 'tic';
+        const CELL_STATE_TAC = 'tac';
         const CELL_STATE_EMPTY = '';
         const CELL_CSS_CLASS_CROSSED = 'crossed';
 
@@ -123,7 +181,7 @@
             }
 
             _refresh() {
-                this._htmlElement.innerText = this._state;
+                this._htmlElement.classList.add(this._state);
             }
 
             cross() {
@@ -190,6 +248,138 @@
             get name() {
                 return this._name;
             }
+
+            /**
+             * Return object in JSON representation
+             * {
+             *     name: string,
+             *     isTic: boolean
+             * }
+             *
+             * @returns {object}
+             */
+            getAsJson() {
+                return {name: this._name, isTic: this._isTic}
+            }
+        }
+
+        /**
+         * Class represents one particular competition of Tic Tac Toe game
+         */
+        class CompetitionItem {
+
+            /**
+             * @param {Player} playerTic
+             * @param {Player} playerTac
+             * @param {Player|null} winner It could already given playerTic or PlayerTac or null if no one won
+             */
+            constructor(playerTic, playerTac, winner) {
+                this._playerTic = playerTic;
+                this._playerTac = playerTac;
+                this._winner = winner;
+            }
+
+            get playerTic() {
+                return this._playerTic;
+            }
+
+            get playerTac() {
+                return this._playerTac;
+            }
+
+            get winner() {
+                return this._winner;
+            }
+
+            /**
+             * Return object in JSON representation
+             * {
+             *     playerTic: {name: string, isTic: boolean},
+             *     playerTac: {name: string, isTic: boolean},
+             *     winner: null|{name: string, isTic: boolean},
+             * }
+             *
+             * @returns {object}
+             */
+            getAsJson() {
+                return {
+                    'playerTic': this._playerTic.getAsJson(),
+                    'playerTac': this._playerTac.getAsJson(),
+                    'winner': this._winner instanceof Player ? this._winner.getAsJson() : null
+                }
+            }
+        }
+
+        const COMPETITION_COLLECTION_KEY = "competitionCollection";
+
+        /**
+         * Class represents collection of competitions of Tic Tac Toe game
+         */
+        class CompetitionCollection {
+
+            constructor() {
+                this._collection = [];
+            }
+
+            get collection() {
+                return this._collection;
+            }
+
+            clear() {
+                this._collection = [];
+            }
+
+            /**
+             * @param {Player} playerTic
+             * @param {Player} playerTac
+             * @param {Player|null} winner
+             */
+            addItem(playerTic, playerTac, winner) {
+                this._collection.push(
+                    new CompetitionItem(playerTic, playerTac, winner));
+            }
+
+            saveToLocalStorage() {
+                window.localStorage.setItem(COMPETITION_COLLECTION_KEY, this._serializeCollection());
+            }
+
+            _serializeCollection() {
+                let collection = [];
+                this._collection.forEach(item => {
+                    collection.push(item.getAsJson());
+                });
+
+                return JSON.stringify(collection);
+            }
+
+            retrieveFromLocalStorage() {
+                this.clear();
+
+                let collectionSerialized = window.localStorage.getItem(COMPETITION_COLLECTION_KEY);
+                let collection;
+                try {
+                    collection = JSON.parse(collectionSerialized) || [];
+                } catch (e) {
+                    console.error('Unable to parse given data as JSON');
+                    return;
+                }
+
+                collection.forEach(item => {
+                    let playerTic, playerTac, winner;
+                    playerTic = new Player(item.playerTic.name, item.playerTic.isTic);
+                    playerTac = new Player(item.playerTac.name, item.playerTac.isTic);
+                    if (item.winner === null) {
+                        winner = null;
+                    } else {
+                        winner = item.winner.isTic ? playerTic : playerTac;
+                    }
+
+                    this.addItem(playerTic, playerTac, winner);
+                });
+
+                console.log('Retrieved collection', this.collection);
+            }
+
         }
 
         /**
@@ -205,8 +395,12 @@
                 this._playerTic = new Player(playerTicName, true);
                 this._playerTac = new Player(playerTacName, false);
                 this._field = new Field((this._doPlayerStep).bind(this));
+                this._competitions = new CompetitionCollection();
+                this._competitions.retrieveFromLocalStorage();
                 this._gameOver = false;
                 this._step = 0;
+
+                this._printScores();
 
                 /**
                  * @type {Player}
@@ -240,13 +434,19 @@
 
                 if (this._isPlayerWon(this._currentPlayer)) {
                     this._gameOver = true;
+                    this._competitions.addItem(this._playerTic, this._playerTac, this._currentPlayer);
+                    this._competitions.saveToLocalStorage();
                     this._printResult(`${this._currentPlayer.name} is winner!`);
+                    this._printScores();
                     return;
                 }
 
                 if (this._isLastStep()) {
                     this._gameOver = true;
+                    this._competitions.addItem(this._playerTic, this._playerTac, null);
+                    this._competitions.saveToLocalStorage();
                     this._printResult(`Game over!`);
+                    this._printScores();
                     return;
                 }
 
@@ -345,10 +545,27 @@
              * @private
              */
             _printResult($message) {
-                let scores = document.getElementById('game-scores');
+                let scores = document.getElementById('game-over');
                 scores.innerText = $message;
+                scores.classList.remove('hidden');
                 let todos = document.getElementById('todos');
                 todos.classList.remove('hidden');
+            }
+
+            _printScores() {
+                let htmlContainer = document.getElementById('game-scores');
+                htmlContainer.innerText = '';
+                let competitionCollection = this._competitions.collection.reverse().slice(0, 5);
+                competitionCollection.forEach(item => {
+                    let text = `${item.playerTic.name} vs ${item.playerTac.name}: winner is ${item.winner ? item.winner.name : 'no one'}`;
+                    htmlContainer.appendChild(this._makeScoreItem(text));
+                });
+            }
+
+            _makeScoreItem(text) {
+                let item = document.createElement('p');
+                item.innerText = text;
+                return item;
             }
         }
 
@@ -361,26 +578,15 @@
 </head>
 <body>
     <div id="game-field">
+        <div id="game-over" class="hidden"></div>
         <div id="cell-00"></div><div id="cell-01"></div><div id="cell-02"></div>
         <div id="cell-10"></div><div id="cell-11"></div><div id="cell-12"></div>
         <div id="cell-20"></div><div id="cell-21"></div><div id="cell-22"></div>
     </div>
-    <div id="game-scores">
-    </div>
-    <div id="todos" class="hidden">
-        <p><strong>TODO list</strong></p>
-        <p><i>Web part</i></p>
-        <p>
-            1. Implement class Scores to represent game results<br>
-            2. Show results of the last and previous games<br>
-            3. Start next game without reloading page
-        </p>
-        <p><i>Server part</i></p>
-        <p>
-            1. Implement endpoints:<br>
-            - GET scores/ which provides list of game results in JSON
-            - POST scores/ which adds a new item to game results
-        </p>
-    </div>
+    <div id="game-scores"></div>
+    <nav>
+        It's an HTML/CSS/JavaScript version. Full version is available by
+        <a href="https://github.com/ValikDev/tic-tac-toe-server">link</a>
+    </nav>
 </body>
 </html>
